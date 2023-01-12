@@ -88,10 +88,16 @@ class MenuController extends Controller
         DB::beginTransaction();
 
         try{
-            $rel_models = [];
-            if(count($request->rel_tab_names)){
-                $rel_models = $request->rel_tab_names;
+            $rel_tab_data = [];
+            if (isset($request->rel_tab_names)) {
+                $rel_tab_data['rel_tab_names'] = $request->rel_tab_names;
+                $rel_tab_data['rel_tab_foreign_keys'] = $request->rel_tab_foreign_keys;
+                $rel_tab_data['rel_tab_relations'] = $request->rel_tab_relations;
+                $rel_tab_data['rel_tab_column_names'] = $request->rel_tab_column_names;
+                $rel_tab_data['rel_tab_column_types'] = $request->rel_tab_column_types;
+                $rel_tab_data['rel_tab_column_default_types'] = $request->rel_tab_column_default_types;
             }
+
             $model = Menu::create([
                 'menu_of' => Str::lower($request->menu_of),
                 'parent_id' => $request->parent_id,
@@ -99,7 +105,7 @@ class MenuController extends Controller
                 'label' => $request->label,
                 'menu' => str_replace(' ', '_', strtolower($request->menu)),
                 'url' => Str::lower($request->menu_of).'/'.str_replace(' ', '_', strtolower($request->menu)),
-                'rel_models' => json_encode($rel_models),
+                'rel_tab_data' => json_encode($rel_tab_data),
             ]);
 
             DB::commit();
@@ -186,6 +192,8 @@ class MenuController extends Controller
         require base_path()."/crud-template/config.php";
 
         $model = Menu::where('id', $id)->first();
+        $rel_tab_data = json_decode($model->rel_tab_data);
+        $rel_models = $rel_tab_data->rel_tab_names;
 
         $this->validate($request, [
                 'menu' => 'unique:menus,menu,'.$model->id,
@@ -243,10 +251,6 @@ class MenuController extends Controller
                     }
                 }
 
-                /* if(json_decode($model->rel_models)){
-
-                } */
-
                 //delete views with all files
                 $modelName = str_replace(' ', '', ucwords($model->menu)) ;
                 $viewFolderName = Str::plural(str::lower($modelName));
@@ -281,6 +285,29 @@ class MenuController extends Controller
                 }
 
                 Schema::drop($table_name);
+
+                //delete model & migration file
+                if(count($rel_models)>0){
+                    foreach($rel_models as $rel_model){
+                        //delete rel model
+                        $relModelName = str_replace(' ', '', ucwords($rel_model));
+                        $rel_model_name = $relModelName  .".php";
+                        $relModelPath = base_path('app/Models/').$rel_model_name;
+                        if(file_exists($relModelPath)){
+                            unlink($relModelPath);
+                        }
+
+                        //delete rel migration file
+                        $rel_migration_file = Str::plural(str_replace(' ', '_', strtolower($rel_model)));
+                        $rel_migration_file_name = '_create_'.$rel_migration_file ."_table";
+                        foreach(File::allFiles('database/migrations') as $file){
+                            if(str_contains($file, $rel_migration_file_name)){
+                                DB::table('migrations')->where('migration', 'like',  '%' .$rel_migration_file_name)->delete();
+                                unlink($file);
+                            }
+                        }
+                    }
+                }
 
                 //re-create menu
                 $model->menu_of = Str::lower($request->menu_of);
@@ -328,6 +355,8 @@ class MenuController extends Controller
         } */
 
         $model = Menu::where('id', $id)->first();
+        $rel_tab_data = json_decode($model->rel_tab_data);
+        $rel_models = $rel_tab_data->rel_tab_names;
 
         if($model){
             //delete resource route from web
@@ -401,6 +430,29 @@ class MenuController extends Controller
             Schema::drop($table_name);
 
             $model->delete();
+
+            //delete model & migration file
+            if(count($rel_models)>0){
+                foreach($rel_models as $rel_model){
+                    //delete rel model
+                    $relModelName = str_replace(' ', '', ucwords($rel_model));
+                    $rel_model_name = $relModelName  .".php";
+                    $modelPath = base_path('app/Models/').$rel_model_name;
+                    if(file_exists($modelPath)){
+                        unlink($modelPath);
+                    }
+
+                    //delete rel migration file
+                    $migration_file = Str::plural(str_replace(' ', '_', strtolower($rel_model)));
+                    $migration_file_name = '_create_'.$migration_file ."_table";
+                    foreach(File::allFiles('database/migrations') as $file){
+                        if(str_contains($file, $migration_file_name)){
+                            DB::table('migrations')->where('migration', 'like',  '%' .$migration_file_name)->delete();
+                            unlink($file);
+                        }
+                    }
+                }
+            }
 
             $onlySoftDeleted = Menu::onlyTrashed()->count();
             if($model){
@@ -476,6 +528,10 @@ class MenuController extends Controller
         if(count($request->rel_tab_names)){
             foreach($request->rel_tab_names as $index=>$rel_tab){
                 $column_strings = [];
+
+                $foreign_key = $request->rel_tab_foreign_keys[$index];
+                $column_strings[] = '$table->integer("'.$foreign_key.'");';
+
                 foreach($request->rel_tab_column_names[$index] as $key=>$name){
                     $default_type = '';
                     if($request->rel_tab_column_default_types[$index][$key]=='nullable'){
@@ -487,9 +543,6 @@ class MenuController extends Controller
                     }
                     $column_strings[] = '$table->'.$request->rel_tab_column_types[$index][$key].'("'.str_replace(' ', '_', strtolower($name)).'")'.$default_type;
                 }
-
-                $foreign_key = $request->rel_tab_foreign_keys[$index];
-                $column_strings[] = '$table->integer("'.$foreign_key.'");';
 
                 $migration_string = implode(',', $column_strings);
                 $migration_columns = str_replace(',', ' ', $migration_string);
@@ -626,52 +679,53 @@ class MenuController extends Controller
         $relations = '';
         if(count($data->rel_tab_names)){
             foreach($data->rel_tab_names as $index=>$rel_tab){
-                $modelName = str_replace(' ', '', ucwords($rel_tab)) ;
-                $table_name = Str::plural(str_replace(' ', '_', strtolower($rel_tab)));
-                $root = base_path();
-                $templateFolder = $root ."/crud-template";
-                $newDir = MODEL_PATH;
+                $relModelName = str_replace(' ', '', ucwords($rel_tab)) ;
+                $rel_table_name = Str::plural(str_replace(' ', '_', strtolower($rel_tab)));
+                $rel_root = base_path();
+                $relTemplateFolder = $rel_root ."/crud-template";
+                $relNewDir = MODEL_PATH;
 
+                $foreign_key = $data->rel_tab_foreign_keys[$index];
                 foreach ($data->rel_tab_relations[$index] as $r_key => $relation) {
-                    $foreign_key = $data->rel_tab_foreign_keys[$r_key];
-                    $relations .= 'public function has'.Str::ucfirst($rel_tab).'(){'.
-                                    '$this->'.$relation.'('.$rel_tab.'::class,"'.$foreign_key.'", "id")'.
+                    $relations .= 'public function '.$relation.Str::ucfirst($rel_tab).'(){ '.
+                                    '$this->'.$relation.'('.$rel_tab.'::class,"'.$foreign_key.'", "id");'.
                                 '}';
                 }
 
-                $modelFile = file_get_contents($templateFolder."/model.php");
-                $str1 = str_replace('{modelName}', $modelName, $modelFile);
-                $str1 = str_replace('{tableName}', $table_name, $str1);
+                $relModelFile = file_get_contents($relTemplateFolder."/model.php");
+                $rel_str1 = str_replace('{modelName}', $relModelName, $relModelFile);
+                $rel_str1 = str_replace('{tableName}', $rel_table_name, $rel_str1);
 
-                $columns = DB::select('show columns from ' . $table_name);
+                $rel_columns = DB::select('show columns from ' . $rel_table_name);
 
-                $temp  = array();
-                $temp2 = array();
-                $conditions  = "";
-                foreach ($columns as $value) {
-                    if ($value->Field != 'id' && $value->Field != 'deleted_at' && $value->Field != 'created_at' && $value->Field != 'updated_at' && $value->Field != 'status') {
-                        $temp[] = $value->Field;
-                        if ($value->Null == "NO") {
-                            $temp2[] .=  "'".$value->Field . "' => 'required'" ;
+                $rel_temp  = array();
+                $rel_temp2 = array();
+                $rel_conditions  = "";
+                foreach ($rel_columns as $rel_value) {
+                    if ($rel_value->Field != 'id' && $rel_value->Field != 'deleted_at' && $rel_value->Field != 'created_at' && $rel_value->Field != 'updated_at' && $rel_value->Field != 'status') {
+                        $rel_temp[] = $rel_value->Field;
+                        if ($rel_value->Null == "NO") {
+                            $rel_temp2[] .=  "'".$rel_value->Field . "' => 'required'" ;
                         }
-                        $conditions .='if(!empty(Input::get("'.$value->Field.'"))){
-                        $query->where("'.$value->Field.'","=",Input::get("'.$value->Field.'"));
+                        $rel_conditions .='if(!empty(Input::get("'.$rel_value->Field.'"))){
+                        $query->where("'.$rel_value->Field.'","=",Input::get("'.$rel_value->Field.'"));
                         } ' ."\n";
                     }
                 }
 
-                $fieldsName = "'".implode("','", $temp) ."'";
-                $rules = implode(",", $temp2);
-                $str1 = str_replace('{fieldsNameOnly}', $fieldsName, $str1);
-                $str1 = str_replace('{rules}', $rules, $str1);
-                $str1 = str_replace('{conditions}', $conditions, $str1);
-                if(!is_dir($newDir)){
-                    mkdir($newDir);
+                $rel_fieldsName = "'".implode("','", $rel_temp) ."'";
+                $rel_rules = implode(",", $rel_temp2);
+                $rel_str1 = str_replace('{fieldsNameOnly}', $rel_fieldsName, $rel_str1);
+                $rel_str1 = str_replace('{rules}', $rel_rules, $rel_str1);
+                $rel_str1 = str_replace('{conditions}', $rel_conditions, $rel_str1);
+                $rel_str1 = str_replace('{relations}', $relations, $rel_str1);
+                if(!is_dir($relNewDir)){
+                    mkdir($relNewDir);
                 }
 
-                $ext = ".php";
-                $str1  = "<?php \n". $str1;
-                $this->createFile($newDir , $modelName , $ext , $str1);
+                $rel_ext = ".php";
+                $rel_str1  = "<?php \n". $rel_str1;
+                $this->createFile($relNewDir , $relModelName , $rel_ext , $rel_str1);
             }
         }
 

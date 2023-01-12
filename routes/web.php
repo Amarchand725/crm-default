@@ -30,6 +30,14 @@ Route::get('account/verify/{token}', [App\Http\Controllers\UserController::class
 Route::get('dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('dashboard')->middleware(['auth', 'is_verify_email']);
 
 // auto-routes: admin
+Route::get('computer/trash/records', 'App\Http\Controllers\general\ComputerController@trashRecords')->name('general.computer.trash.records');
+Route::get('computer/restore/{id}', 'App\Http\Controllers\general\ComputerController@restore')->name('general.computer.restore');
+
+
+
+
+
+ 
 
 
 
@@ -96,3 +104,8 @@ Route::group(['prefix'=>'admin', 'middleware' => 'auth'], function() {
 require __DIR__.'/auth.php';
 
 
+
+
+
+
+Route::resource('general/computer', 'App\Http\Controllers\general\ComputerController');

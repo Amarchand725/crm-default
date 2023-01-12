@@ -1,6 +1,5 @@
-@extends('admin.layouts.app')
-@section('title', $page_title)
-@section('content')
+<?php $__env->startSection('title', $page_title); ?>
+<?php $__env->startSection('content'); ?>
 <div id="kt_app_content" class="app-content" style="margin-top:5px">
     <!--begin::Content container-->
     <div id="kt_app_content_container" class="app-container ">
@@ -10,10 +9,10 @@
             <div class="card-header border-0 cursor-pointer" role="button">
                 <!--begin::Card title-->
                 <div class="card-title m-0">
-                    <h3 class="fw-bolder m-0">{{ $page_title }}</h3>
+                    <h3 class="fw-bolder m-0"><?php echo e($page_title); ?></h3>
                 </div>
                 <div class="content-header-right mt-3">
-                    <a href="{{ route('menu.index') }}" title="All Menus" class="btn btn-primary btn-sm">View All</a>
+                    <a href="<?php echo e(route('menu.index')); ?>" title="All Menus" class="btn btn-primary btn-sm">View All</a>
                 </div>
                 <!--end::Card title-->
             </div>
@@ -22,9 +21,10 @@
             <!--begin::Content-->
             <div id="" class="collapse show">
                 <!--begin::Form-->
-                <form action="{{ route('menu.update', $menu->id) }}" id="regform" class="form-horizontal" enctype="multipart/form-data" method="post" accept-charset="utf-8">
-                    @csrf
-                    {{ method_field('PATCH') }}
+                <form action="<?php echo e(route('menu.update', $menu->id)); ?>" id="regform" class="form-horizontal" enctype="multipart/form-data" method="post" accept-charset="utf-8">
+                    <?php echo csrf_field(); ?>
+                    <?php echo e(method_field('PATCH')); ?>
+
 
                     <div class="card-body border-top p-9">
                         <!--begin::Input group-->
@@ -36,36 +36,19 @@
                             <!--begin::Col-->
                             <div class="col-lg-8 fv-row">
                                 <select name="menu_of" class="selectpicker" data-live-search="true">
-                                    <option value="general" {{ $menu->menu_of=='general'?'selected':'' }}>General</option>
-                                    @foreach ($roles as $role)
-                                    <option value="{{ Str::lower($role->name) }}" {{ $menu->menu_of==Str::lower($role->name)?'selected':'' }}>{{ $role->name }}</option>
-                                    @endforeach
+                                    <option value="general" <?php echo e($menu->menu_of=='general'?'selected':''); ?>>General</option>
+                                    <?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e(Str::lower($role->name)); ?>" <?php echo e($menu->menu_of==Str::lower($role->name)?'selected':''); ?>><?php echo e($role->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                                 <br />
-                                <span style="color: red">{{ $errors->first('menu_of') }}</span>
+                                <span style="color: red"><?php echo e($errors->first('menu_of')); ?></span>
                             </div>
                             <!--end::Col-->
                         </div>
                         <!--end::Input group-->
                         <!--begin::Input group-->
-                        {{-- <div class="row mb-6">
-                            <!--begin::Label-->
-                            <label class="col-lg-2 col-form-label fw-bold fs-6">Parent Menu</label>
-                            <!--end::Label-->
-
-                            <!--begin::Col-->
-                            <div class="col-lg-8 fv-row">
-                                <select name="parent_id" class="selectpicker" data-live-search="true">
-                                    <option value="" selected>Select parent</option>
-                                    @foreach ($parent_menus as $p_menu)
-                                        <option value="{{ $p_menu->id }}" {{ $menu->id==$p_menu->id?'selected':'' }}>{{ $p_menu->menu }}</option>
-                                    @endforeach
-                                </select>
-                                <br />
-                                <span style="color: red">{{ $errors->first('parent_id') }}</span>
-                            </div>
-                            <!--end::Col-->
-                        </div> --}}
+                        
                         <!--end::Input group-->
                         <!--begin::Input group-->
                         <div class="row mb-6">
@@ -75,10 +58,10 @@
 
                             <!--begin::Col-->
                             <div class="col-lg-8 fv-row">
-                                <input type="text" name="icon" value="{{ $menu->icon }}" class="form-control form-control-lg form-control-solid" placeholder="Copy font awesome tag from library and paste here e.g <i class='fa fa-user' aria-hidden='true'></i>"/>
+                                <input type="text" name="icon" value="<?php echo e($menu->icon); ?>" class="form-control form-control-lg form-control-solid" placeholder="Copy font awesome tag from library and paste here e.g <i class='fa fa-user' aria-hidden='true'></i>"/>
                                 <a href="https://fontawesome.com/v4/icons/" style="margin-top: 5px" target="_blank" class="btn btn-success">Choose Icon</a><br />
                                 <br />
-                                <span style="color: red">{{ $errors->first('icon') }}</span>
+                                <span style="color: red"><?php echo e($errors->first('icon')); ?></span>
                             </div>
                             <!--end::Col-->
                         </div>
@@ -91,9 +74,9 @@
 
                             <!--begin::Col-->
                             <div class="col-lg-8 fv-row">
-                                <input type="text" name="label" value="{{ $menu->label }}" class="form-control form-control-lg form-control-solid" placeholder="Enter label e.g All Users"/>
+                                <input type="text" name="label" value="<?php echo e($menu->label); ?>" class="form-control form-control-lg form-control-solid" placeholder="Enter label e.g All Users"/>
                                 <br />
-                                <span style="color: red">{{ $errors->first('label') }}</span>
+                                <span style="color: red"><?php echo e($errors->first('label')); ?></span>
                             </div>
                             <!--end::Col-->
                         </div>
@@ -106,9 +89,9 @@
 
                             <!--begin::Col-->
                             <div class="col-lg-8 fv-row">
-                                <input type="text" name="menu" value="{{ $menu->menu }}" class="form-control form-control-lg form-control-solid" placeholder="Enter Menu e.g user"/>
+                                <input type="text" name="menu" value="<?php echo e($menu->menu); ?>" class="form-control form-control-lg form-control-solid" placeholder="Enter Menu e.g user"/>
                                 <br />
-                                <span style="color: red">{{ $errors->first('menu') }}</span>
+                                <span style="color: red"><?php echo e($errors->first('menu')); ?></span>
                             </div>
                             <!--end::Col-->
                         </div>
@@ -134,7 +117,7 @@
                                         <tr>
                                             <td>
                                                 <input type="text" class="form-control" name="column_names[]" value="" placeholder="Enter column name">
-                                                <span style="color: red">{{ $errors->first('column_names.*') }}</span>
+                                                <span style="color: red"><?php echo e($errors->first('column_names.*')); ?></span>
                                             </td>
                                             <td style="width:250px">
                                                 <select name="types[]" id="" class="form-control js-example-basic-single">
@@ -164,13 +147,13 @@
                                                 <button type="button" class="btn btn-success btn-sm add-more-btn"><i class="fa fa-plus"></i></button>
                                             </td>
                                         </tr>
-                                        @if($table_columns)
-                                            @foreach ($table_columns as $column)
+                                        <?php if($table_columns): ?>
+                                            <?php $__currentLoopData = $table_columns; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $column): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <tr>
                                                     <td>
-                                                        <input type="text" class="form-control" name="column_names[]" value="{{ $column['field'] }}" placeholder="Enter Menu e.g user">
+                                                        <input type="text" class="form-control" name="column_names[]" value="<?php echo e($column['field']); ?>" placeholder="Enter Menu e.g user">
                                                     </td>
-                                                    @php
+                                                    <?php
                                                         $data_types = [
                                                             'integer'=>'INT',
                                                             'string'=>'VARCHAR',
@@ -181,15 +164,15 @@
                                                             'float'=>'FLOAT',
                                                             'binary'=>'BLOB (Image or other attachments)'
                                                         ];
-                                                    @endphp
+                                                    ?>
                                                     <td>
                                                         <select name="types[]" id="" class="form-control js-example-basic-single">
-                                                            @foreach ($data_types as $key=>$data_type)
-                                                                <option value="{{ $key }}" {{ $key==$column['type']?'selected':'' }}>{{ $data_type }}</option>
-                                                            @endforeach
+                                                            <?php $__currentLoopData = $data_types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key=>$data_type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <option value="<?php echo e($key); ?>" <?php echo e($key==$column['type']?'selected':''); ?>><?php echo e($data_type); ?></option>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                         </select>
                                                     </td>
-                                                    @php
+                                                    <?php
                                                         $default_type = '';
                                                         if($column['default_type']=='NO'){
                                                             if($column['default_value'] != ''){
@@ -202,25 +185,25 @@
                                                         }else{
                                                             $default_type = 'default';
                                                         }
-                                                    @endphp
+                                                    ?>
                                                     <td>
                                                         <select name="default_types[]" id="" class="form-control default_selection js-example-basic-single">
-                                                            <option value="none" {{ $default_type=='none'?'selected':'' }}>None</option>
-                                                            <option value="nullable" {{ $default_type=='nullable'?'selected':'' }}>Null</option>
-                                                            <option value="default" {{ $default_type=='default'?'selected':'' }}>Default</option>
+                                                            <option value="none" <?php echo e($default_type=='none'?'selected':''); ?>>None</option>
+                                                            <option value="nullable" <?php echo e($default_type=='nullable'?'selected':''); ?>>Null</option>
+                                                            <option value="default" <?php echo e($default_type=='default'?'selected':''); ?>>Default</option>
                                                         </select>
                                                         <span class="default-field">
-                                                            @if($column['default_value'] != '')
-                                                                <input type="text" name="defaults[]" value="{{ $column['default_value'] }}" class="form-control" style="margin-top:5px" placeholder="Enter default value">
-                                                            @endif
+                                                            <?php if($column['default_value'] != ''): ?>
+                                                                <input type="text" name="defaults[]" value="<?php echo e($column['default_value']); ?>" class="form-control" style="margin-top:5px" placeholder="Enter default value">
+                                                            <?php endif; ?>
                                                         </span>
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-danger btn-sm remove-btn"><i class="fa fa-times"></i></button>
                                                     </td>
                                                 </tr>
-                                            @endforeach
-                                        @endif
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -242,7 +225,7 @@
                         <!--end::Input group-->
 
                         <span id="relation-tables">
-                            @php
+                            <?php
                                 $rel_tab_data = json_decode($menu->rel_tab_data);
                                 $rel_tab_names = $rel_tab_data->rel_tab_names;
                                 $rel_tab_foreign_keys = $rel_tab_data->rel_tab_foreign_keys;
@@ -250,35 +233,35 @@
                                 $rel_tab_column_names = $rel_tab_data->rel_tab_column_names;
                                 $rel_tab_column_types = $rel_tab_data->rel_tab_column_types;
                                 $rel_tab_column_default_types = $rel_tab_data->rel_tab_column_default_types;
-                            @endphp
-                            @if(count($rel_tab_names)>0)
-                                @foreach ($rel_tab_names as $r_tab_key=>$rel_tab_name)
-                                    <div class="rel-table" data-auto="{{ $r_tab_key }}">
+                            ?>
+                            <?php if(count($rel_tab_names)>0): ?>
+                                <?php $__currentLoopData = $rel_tab_names; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r_tab_key=>$rel_tab_name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="rel-table" data-auto="<?php echo e($r_tab_key); ?>">
                                         <div class="row mb-6">
                                             <label class="col-lg-2 col-form-label required fw-bold fs-6"> Relation Model Name</label>
                                             <div class="col-lg-3 fv-row">
-                                                <input type="text" class="form-control" value="{{ $rel_tab_name }}" name="rel_tab_names[]" placeholder="Enter relation model name e.g User">
+                                                <input type="text" class="form-control" value="<?php echo e($rel_tab_name); ?>" name="rel_tab_names[]" placeholder="Enter relation model name e.g User">
                                             </div>
                                             <div class="col-lg-2 fv-row">
-                                                <input type="text" class="form-control" value="{{ $rel_tab_foreign_keys[$r_tab_key] }}" name="rel_tab_foreign_keys[]" placeholder="Enter foreign key">
+                                                <input type="text" class="form-control" value="<?php echo e($rel_tab_foreign_keys[$r_tab_key]); ?>" name="rel_tab_foreign_keys[]" placeholder="Enter foreign key">
                                             </div>
                                             <div class="col-lg-2 fv-row">
-                                                @php
+                                                <?php
                                                     $relations = ['hasOne'=>'Has One', 'hasMany'=>'Has Many', 'belongsTo'=>'Belongs To', 'belongsToMany'=>'Belongs To Many'];
-                                                @endphp
-                                                <select class="form-control" multiple name="rel_tab_relations[{{ $r_tab_key }}][]">
-                                                    @foreach ($relations as $rel_key=>$relation)
-                                                        @php $bool = true; @endphp
-                                                        @foreach ($rel_tab_relations[$r_tab_key] as $rel_tab_relation)
-                                                            @if($rel_tab_relation==$rel_key)
-                                                                <option value="{{ $rel_key }}" selected>{{ $relation }}</option>
-                                                                @php $bool = false; @endphp
-                                                            @endif
-                                                        @endforeach
-                                                        @if($bool)
-                                                            <option value="{{ $rel_key }}">{{ $relation }}</option>
-                                                        @endif
-                                                    @endforeach
+                                                ?>
+                                                <select class="form-control" multiple name="rel_tab_relations[<?php echo e($r_tab_key); ?>][]">
+                                                    <?php $__currentLoopData = $relations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rel_key=>$relation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php $bool = true; ?>
+                                                        <?php $__currentLoopData = $rel_tab_relations[$r_tab_key]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rel_tab_relation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php if($rel_tab_relation==$rel_key): ?>
+                                                                <option value="<?php echo e($rel_key); ?>" selected><?php echo e($relation); ?></option>
+                                                                <?php $bool = false; ?>
+                                                            <?php endif; ?>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php if($bool): ?>
+                                                            <option value="<?php echo e($rel_key); ?>"><?php echo e($relation); ?></option>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </select>
                                             </div>
                                             <div class="col-lg-1 fv-row">
@@ -300,11 +283,11 @@
                                                     <tbody id="tbody">
                                                         <tr>
                                                             <td>
-                                                                <input type="text" class="form-control" name="rel_tab_column_names[{{ $r_tab_key }}][]" value="" placeholder="Enter column name">
-                                                                <span style="color: red">{{ $errors->first("column_names.*") }}</span>
+                                                                <input type="text" class="form-control" name="rel_tab_column_names[<?php echo e($r_tab_key); ?>][]" value="" placeholder="Enter column name">
+                                                                <span style="color: red"><?php echo e($errors->first("column_names.*")); ?></span>
                                                             </td>
                                                             <td style="width:250px">
-                                                                <select name="rel_tab_column_types[{{ $r_tab_key }}][]" id="" class="form-control js-example-basic-single">
+                                                                <select name="rel_tab_column_types[<?php echo e($r_tab_key); ?>][]" id="" class="form-control js-example-basic-single">
                                                                     <option value="integer" selected>INT</option>
                                                                     <option value="string">VARCHAR</option>
                                                                     <option value="boolean">BOOLEAN</option>
@@ -320,7 +303,7 @@
                                                                 </select>
                                                             </td>
                                                             <td style="width:130px">
-                                                                <select name="rel_tab_column_default_types[{{ $r_tab_key }}][]" id="" class="form-control default_selection js-example-basic-single">
+                                                                <select name="rel_tab_column_default_types[<?php echo e($r_tab_key); ?>][]" id="" class="form-control default_selection js-example-basic-single">
                                                                     <option value="none" selected>None</option>
                                                                     <option value="nullable">Null</option>
                                                                     <option value="default">Default</option>
@@ -331,33 +314,33 @@
                                                                 <button type="button" class="btn btn-success btn-sm rel-add-more-btn"><i class="fa fa-plus"></i></button>
                                                             </td>
                                                         </tr>
-                                                        @foreach ($rel_tab_column_names[$r_tab_key] as $rel_tab_col_key=>$rel_tab_column_name)
+                                                        <?php $__currentLoopData = $rel_tab_column_names[$r_tab_key]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rel_tab_col_key=>$rel_tab_column_name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                         <tr>
                                                             <td>
-                                                                <input type="text" class="form-control" name="rel_tab_column_names[{{ $r_tab_key }}][]" value="{{ $rel_tab_column_name }}" placeholder="Enter column name">
-                                                                <span style="color: red">{{ $errors->first("column_names.*") }}</span>
+                                                                <input type="text" class="form-control" name="rel_tab_column_names[<?php echo e($r_tab_key); ?>][]" value="<?php echo e($rel_tab_column_name); ?>" placeholder="Enter column name">
+                                                                <span style="color: red"><?php echo e($errors->first("column_names.*")); ?></span>
                                                             </td>
                                                             <td style="width:250px">
-                                                                <select name="rel_tab_column_types[{{ $r_tab_key }}][]" id="" class="form-control js-example-basic-single">
-                                                                    <option value="integer" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='integer'?'selected':'' }}>INT</option>
-                                                                    <option value="string" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='string'?'selected':'' }}>VARCHAR</option>
-                                                                    <option value="boolean" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='boolean'?'selected':'' }}>BOOLEAN</option>
-                                                                    <option value="date" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='date'?'selected':'' }}>DATE</option>
-                                                                    <option value="time" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='time'?'selected':'' }}>TIME</option>
-                                                                    <option value="datetime" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='datetime'?'selected':'' }}>DATETIME</option>
-                                                                    <option value="text" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='text'?'selected':'' }}>TEXT</option>
-                                                                    <option value="bigInteger" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='bigInteger'?'selected':'' }}>BIGINT</option>
-                                                                    <option value="decimal" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='decimal'?'selected':'' }}>DECIMAL</option>
-                                                                    <option value="float" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='float'?'selected':'' }}>FLOAT</option>
-                                                                    <option value="double" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='double'?'selected':'' }}>DOUBLE</option>
-                                                                    <option value="binary" {{ $rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='binary'?'selected':'' }}>BLOB (Image or other attachments)</option>
+                                                                <select name="rel_tab_column_types[<?php echo e($r_tab_key); ?>][]" id="" class="form-control js-example-basic-single">
+                                                                    <option value="integer" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='integer'?'selected':''); ?>>INT</option>
+                                                                    <option value="string" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='string'?'selected':''); ?>>VARCHAR</option>
+                                                                    <option value="boolean" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='boolean'?'selected':''); ?>>BOOLEAN</option>
+                                                                    <option value="date" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='date'?'selected':''); ?>>DATE</option>
+                                                                    <option value="time" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='time'?'selected':''); ?>>TIME</option>
+                                                                    <option value="datetime" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='datetime'?'selected':''); ?>>DATETIME</option>
+                                                                    <option value="text" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='text'?'selected':''); ?>>TEXT</option>
+                                                                    <option value="bigInteger" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='bigInteger'?'selected':''); ?>>BIGINT</option>
+                                                                    <option value="decimal" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='decimal'?'selected':''); ?>>DECIMAL</option>
+                                                                    <option value="float" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='float'?'selected':''); ?>>FLOAT</option>
+                                                                    <option value="double" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='double'?'selected':''); ?>>DOUBLE</option>
+                                                                    <option value="binary" <?php echo e($rel_tab_column_types[$r_tab_key][$rel_tab_col_key]=='binary'?'selected':''); ?>>BLOB (Image or other attachments)</option>
                                                                 </select>
                                                             </td>
                                                             <td style="width:130px">
-                                                                <select name="rel_tab_column_default_types[{{ $r_tab_key }}][]" id="" class="form-control default_selection js-example-basic-single">
-                                                                    <option value="none" {{ $rel_tab_column_default_types[$r_tab_key][$rel_tab_col_key]=='none'?'selected':'' }}>None</option>
-                                                                    <option value="nullable" {{ $rel_tab_column_default_types[$r_tab_key][$rel_tab_col_key]=='nullable'?'selected':'' }}>Null</option>
-                                                                    <option value="default" {{ $rel_tab_column_default_types[$r_tab_key][$rel_tab_col_key]=='default'?'selected':'' }}>Default</option>
+                                                                <select name="rel_tab_column_default_types[<?php echo e($r_tab_key); ?>][]" id="" class="form-control default_selection js-example-basic-single">
+                                                                    <option value="none" <?php echo e($rel_tab_column_default_types[$r_tab_key][$rel_tab_col_key]=='none'?'selected':''); ?>>None</option>
+                                                                    <option value="nullable" <?php echo e($rel_tab_column_default_types[$r_tab_key][$rel_tab_col_key]=='nullable'?'selected':''); ?>>Null</option>
+                                                                    <option value="default" <?php echo e($rel_tab_column_default_types[$r_tab_key][$rel_tab_col_key]=='default'?'selected':''); ?>>Default</option>
                                                                 </select>
                                                                 <span class="default-field"></span>
                                                             </td>
@@ -365,14 +348,14 @@
                                                                 <button type="button" class="btn btn-danger btn-sm remove-btn"><i class="fa fa-times"></i></button>
                                                             </td>
                                                         </tr>
-                                                        @endforeach
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
                                     </div>
-                                @endforeach
-                            @endif
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endif; ?>
                         </span>
                     </div>
 
@@ -400,8 +383,8 @@
         </div>
     </div>
 </div>
-@endsection
-@push('js')
+<?php $__env->stopSection(); ?>
+<?php $__env->startPush('js'); ?>
     <script>
         $(document).on('click', '.rel-add-more-btn', function(){
             var rel_table_auto = $(this).parents('.rel-table').attr('data-auto');
@@ -476,7 +459,7 @@
                                             '<tr>'+
                                                 '<td>'+
                                                     '<input type="text" class="form-control" name="rel_tab_column_names['+rel_table_auto+'][]" value="" placeholder="Enter column name">'+
-                                                    '<span style="color: red">{{ $errors->first("column_names.*") }}</span>'+
+                                                    '<span style="color: red"><?php echo e($errors->first("column_names.*")); ?></span>'+
                                                 '</td>'+
                                                 '<td style="width:250px">'+
                                                     '<select name="rel_tab_column_types['+rel_table_auto+'][]" id="" class="form-control js-example-basic-single">'+
@@ -565,4 +548,6 @@
             $(this).parents('tr').remove();
         });
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('admin.layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\wamp\www\crm-default\resources\views/admin/menus/edit.blade.php ENDPATH**/ ?>
